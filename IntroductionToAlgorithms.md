@@ -108,6 +108,22 @@ MergeSort(A,p,r)
 
 
 
+
+
+## 第3章 函数的增长
+
+### 渐进效率
+
+当输入规模足够大，使得只与运行时间的增长量级有关，即算法的渐进效率，忽略较小的增长量级与常数项。
+
+- $\Theta(g(x)) = \{f(x)|\exist c_1,c_2,n_0 ,\forall n\geq n_0,0\leq c_1g(n)\leq f(n) \leq c_2g(n)\}$  ，渐进紧确界，就是说 $f(x)$ 被 $g(x)$ 夹在了中间。
+- $O(g(x)) = \{f(x)|\exist c,n_0 ,\forall n\geq n_0,0\leq  f(n) \leq cg(n)\}$  ，渐进上界，就是说 $f(x)$ 在 $g(x)$ 下面。 $g(x)$ 可能同阶，也可能高阶。
+- $\Omega(g(x)) = \{f(x)|\exist c,n_0 ,\forall n\geq n_0,0 \leq cg(n)\leq  f(n)\}$  ，渐进下界，就是说 $f(x)$ 在 $g(x)$ 上面。 $g(x)$ 可能同阶，也可能低阶。
+- $o(g(x)) = \{f(x)|\exist c,n_0 ,\forall n\geq n_0,0\leq  f(n) < cg(n)\}$  ，非渐进紧确的上界，就是说 $f(x)$ 在 $g(x)$ 下面。 $g(x)$ 高阶。
+- $\omega(g(x)) = \{f(x)|\exist c,n_0 ,\forall n\geq n_0,0 \leq cg(n)<  f(n)\}$  ，非渐进紧确的下界，就是说 $f(x)$ 在 $g(x)$ 上面。 $g(x)$ 低阶。
+
+
+
 ## 第章
 
 
