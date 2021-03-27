@@ -715,13 +715,221 @@ $T(n) = T(n/5 ) + T(7n/10+6) +O(n)$，设其为线性， $T(n)\leq cn$ ，则可
 
 
 
-## 第章 
+## 第13章 红黑树
+
+
+
+这个地址上讲的比算法导论要好。
+
+[Red-Black Trees | Deletion](https://www.codesdope.com/course/data-structures-red-black-trees-deletion/)
+
+
+
+### 红黑树
+
+每个节点上有一个存储位来表示节点的颜色，通过对从根到叶子的简单路径上各个节点的颜色进行约束，保证没有一条路长度不是另一条的两倍。
+
+
+
+根节点是黑色的，叶节点也是黑色的。
+
+红色节点的子节点必须是黑色的，反之不然。
+
+从一个节点到其所有叶子节点的黑色节点个数相同。
+
+
+
+节点的五个属性：
+
+- 颜色
+- 元素
+- 左节点指针
+- 右节点指针
+- 卫星数据指针
+
+
+
+黑高：一条简单路径中黑色节点的数量。
+
+使用哨兵节点，即所有为空的指针都指向这个节点。
+
+
+
+### 旋转
+
+右旋：把左子节点旋转到父节点的位置上，原左子节点的右节点成为原父节点的左子节点，原父节点成为原左子节点的右节点。
+
+左旋：把右子节点旋转到父节点的位置上，原右子节点的左节点成为原父节点的右子节点，原父节点成为原右子节点的左节点。
+
+
+
+### 插入
 
 
 
 ````c++
-
+RBInsert(T,z)
+    y = T.nil
+    x = T.root
+    // 找到合适的位置
+    while x != T.nil
+        y = x
+        if z.key <x.key
+            x = x.left
+        else
+            x = x.right
+    // 插入
+    z.p = y
+    if y == T.nil
+        T.root = z
+    elseif z.key < y.key 
+        y.left = z
+    else 
+        y.right = z
+    // 设置
+    z.left = T.nil
+    z.right = T.nil   
+    z.color = RED
+    
+    RBInsertFixup(T,z)
+        
+RBInsertFixup(T,z)        
+    while z.p.color == RED
+        if z.p == z.p.p.left
+            y=z.p.p.right
+            // 如果父节点和父节点的兄弟节点都是红的，就把这两个节点变黑，
+            // 父节点的父节点变红，之后改变z为父节点的父节点，迭代。
+            // 若此区域代码运行结束后，z为root，那么此树的黑高会增加，由最后算法最后一句实现
+            if y.color == RED
+                z.p.color = BLACK
+                y.color = BLACK
+                z.p.p.color = RED
+                z = z.p.p
+            else
+                // 如果是父节点的右子节点，那么需要左旋，将父节点的右子节点变为空，或黑树。
+                if z == z.p.right
+                    z = z.p
+                    LeafRotate(T,z)
+                // 之后改变父节点颜色，并右旋，这一步将爷爷节点移动到了其右子树的位置，父节点成为爷爷节点的父节点。
+                z.p.color = BLACK
+                z.p.p.color = RED
+                RightRotate(T,z.p.p)
+     	else
+         	same as then clause with right and left exchanged
+  	T.root.color = BLACK
+             
+        
 ````
+
+
+
+### 删除
+
+
+
+
+
+````c++
+// 把u换成v。
+RBTransplant(T,u,v)
+    if u.p == T.nil
+        T.root = v
+    elseif u == u.p.left
+        u.p.left = v
+    else 
+        u.p.right = v
+    v.p = u.p    
+        
+RBDelete(T,z)
+    
+    y = z
+    yOroginalColor = y.color
+    // 左为空，那么就可以直接替换    
+    if z.left == T.nil
+        x = z.right
+        RBTransplant(T,z,z.right)
+    // 右为空也一样
+    elseif  z.right == T.nil
+        x = z.left
+        RBTransplant(T,z,z.left)
+    // 都不为空，就需要找一个位置能放下两棵子树了。
+    // y是z的后继，使y代替z的位置
+    else
+        // y是右子树中最小的
+        y = TreeMinimun(z.right)
+        yOroginalColor = y.color
+        x = y.right
+        // z的右子树根节点最小的就是根节点，
+        // 也就是右子树没有左子节点，那么就可以把z的左子树直接放在这了。
+        if y.p == z
+            x.p = y
+        // 如果不是，那么就需要将把y移到z的右子节点位置上
+        // 首先将y的右子树移到y的位置上，由于y是最小的，一定没有左子树
+        // 之后将y提到z的右子树位置上。
+        else 
+            RBTransplant(T,y,y.right)
+            y.right  = z.right 
+            y.right.p = y
+        // 使用y替换z
+        RBTransplant(T,z,y)    
+        y.left = z.left
+        y.left.p = y
+        y.color = z.color
+    // 因为使用y替换了z，所以如果y是黑色的，那么就会破坏结构
+    // 而x是替换了y的位置，所以要检测x
+    if yOroginalColor == BLACK
+       	RBDeleteFixup(T,x)
+       
+RBDeleteFixup(T,x)   
+    // 主要问题是原来y的位置，现在x的位置，原本是一个黑色的
+    // 那么移动y之后，就少了一个黑色的
+    // 就是要迭代处理这个问题
+   	while x != T.root and x.color == BLACK
+       	if x == x.p.left
+            w = x.p.right
+            // 如果兄弟节点是红色的，那么就说明父节点是黑色的，
+            // 那么只需要交换兄弟节点与父节点的颜色，之后左旋
+            // 但是没有改变少一个黑色节点的问题，而是转化为了其他情况
+            // 即父节点为红色节点的情况，此树少了一个黑色，而兄弟树没有少
+            if w.color == RED
+                w.color = BlACK
+                x.p.color = RED
+                LeafRotate(T,x.p)
+                w = x.p.right
+            // 此时兄弟节点一定是黑色的了
+            // 如果兄弟节点的子节点都是黑色的，就可以将兄弟节点变红，
+            // 这样兄弟节点也少了一个黑色
+            // 将矛盾上移，因为没有红色节点可以变为黑色，以恢复红黑树
+            if w.left.color == BLACK and w.right.color == BLACK
+                w.color = RED
+                x = x.p
+            else 
+                // 如果兄弟节点的右节点为黑色，而左节点为红色
+                // 那么就可以换色，右旋，使兄弟节点为黑色，
+                // 而兄弟节点的右子节点为红色
+                if w.right.color == BLACK
+                    w.left.color = BLACK
+                    w.color = RED
+                    RightRotate(T,w)
+                    w = x.p.right
+                // 兄弟节点的右子节点为红色
+                // 设置颜色后，左旋，这样对于x来说，额外多出了w的黑色，
+                // 而w上没有多出黑色，完成修复
+                // 本质上是，w的右子节点上的红色变黑，代替w的黑色，
+                // x的父节点变成w的黑色，额外补全的缺的一个黑色。
+                // w的变成x的父节点的颜色，代替了x的父节点，  
+                w.color = x.p.color 
+                x.p.color = BLACK
+                w.right.color = BLACK
+                LeafRotate(T,x.p)
+                x = T.root
+        else 
+           same as then clause with right and left exchanged 
+    // 由于x这个子树上缺了一个黑色，如果因为x为红色跳出时，直接变黑即可        
+    x.color = BLACK
+````
+
+
 
 
 
